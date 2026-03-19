@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(where node:*)",
+      "Bash(where npm:*)",
+      "Bash(cmd.exe /c \"where node\")",
+      "Bash(cmd.exe /c \"where npm\")",
+      "Bash(cmd.exe /c \"where npx\")",
+      "Bash(export PATH=\"/c/Program Files/nodejs:$PATH\")",
+      "Bash(npm --version)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Program Files \\(x86\\)/**)",
+      "Read(//c/Users/ymiya/Desktop/claude code/売上データ置換システム/$APPDATA/**)",
+      "Read(//c/Users/ymiya/Desktop/claude code/売上データ置換システム/$HOME/AppData/Roaming/**)",
+      "Read(//c/Users/ymiya/**)",
+      "Bash(winget install:*)",
+      "Bash(mkdir -p /c/tmp/sales-converter)",
+      "Read(//c/tmp/**)",
+      "Bash(rm -rf /c/tmp/sales-converter)",
+      "Bash(npx --yes create-next-app@14 . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm)",
+      "Bash(npm install:*)",
+      "Bash(npx --yes shadcn@latest init -d)"
+    ]
+  }
+}
