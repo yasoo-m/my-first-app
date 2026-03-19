@@ -2,7 +2,8 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
-const DB_DIR = path.join(process.cwd(), 'src', 'data');
+const isVercel = process.env.VERCEL === '1';
+const DB_DIR = isVercel ? '/tmp' : path.join(process.cwd(), 'src', 'data');
 const DB_PATH = path.join(DB_DIR, 'db.sqlite');
 
 let db: Database.Database | null = null;
