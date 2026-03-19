@@ -20,7 +20,23 @@
       "Bash(rm -rf /c/tmp/sales-converter)",
       "Bash(npx --yes create-next-app@14 . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm)",
       "Bash(npm install:*)",
-      "Bash(npx --yes shadcn@latest init -d)"
+      "Bash(npx --yes shadcn@latest init -d)",
+      "Bash(npx --yes shadcn@latest add table card select input dialog label tabs badge alert textarea separator -y)",
+      "Bash(npx next:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(npx kill-port:*)",
+      "Bash(cmd.exe /c \"netstat -ano | findstr :3000\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s http://localhost:3000/master)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/master)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/api/master/payment-methods)",
+      "Bash(npx --yes kill-port 3000)",
+      "Bash(\"C:/Program Files/nodejs/npx.cmd\" next build)",
+      "Bash(\"C:/Program Files/nodejs/node.exe\" node_modules/next/dist/bin/next build)",
+      "Bash(gh --version)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI:/c/Program Files \\(x86\\)/GitHub CLI\")",
+      "Bash(gh auth:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")"
     ]
   }
 }
