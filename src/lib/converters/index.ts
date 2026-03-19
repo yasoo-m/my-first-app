@@ -4,7 +4,7 @@ import { convertRakuten } from './rakuten';
 import { convertYahoo } from './yahoo';
 import { convertMakeshop } from './makeshop';
 
-export type Converter = (rows: string[][], brand: BrandType) => ConversionResult;
+export type Converter = (rows: string[][], brand: BrandType) => Promise<ConversionResult>;
 
 const converters: Record<MallType, Converter | null> = {
   amazon: convertAmazon,

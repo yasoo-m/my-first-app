@@ -36,7 +36,13 @@
       "Bash(gh --version)",
       "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI:/c/Program Files \\(x86\\)/GitHub CLI\")",
       "Bash(gh auth:*)",
-      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")"
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "Bash(npx vercel:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/nodejs\")",
+      "Bash(where turso:*)",
+      "Bash(powershell -Command \"irm https://get.tur.so/install.ps1 | iex\")",
+      "Bash(powershell -Command \"irm https://get.tur.so/install.ps1 -UseBasicParsing\")",
+      "Bash(npm uninstall:*)"
     ]
   }
 }

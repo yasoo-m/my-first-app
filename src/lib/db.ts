@@ -1,37 +1,34 @@
-import Database from 'better-sqlite3';
+import { createClient, type Client } from '@libsql/client';
 import path from 'path';
 import fs from 'fs';
 
-const isVercel = process.env.VERCEL === '1';
-const DB_DIR = isVercel ? '/tmp' : path.join(process.cwd(), 'src', 'data');
-const DB_PATH = path.join(DB_DIR, 'db.sqlite');
+let client: Client | null = null;
 
-let db: Database.Database | null = null;
+export function getDb(): Client {
+  if (client) return client;
 
-export function recordImport(category: string, fileName: string, recordCount: number) {
-  const db = getDb();
-  db.prepare(
-    'INSERT INTO import_history (category, file_name, record_count) VALUES (?, ?, ?)'
-  ).run(category, fileName, recordCount);
-}
+  const url = process.env.TURSO_DATABASE_URL;
+  const authToken = process.env.TURSO_AUTH_TOKEN;
 
-export function getDb(): Database.Database {
-  if (db) return db;
-
-  if (!fs.existsSync(DB_DIR)) {
-    fs.mkdirSync(DB_DIR, { recursive: true });
+  if (url && authToken) {
+    client = createClient({ url, authToken });
+  } else {
+    // ローカル開発用: ファイルベースSQLite
+    const dbDir = path.join(process.cwd(), 'src', 'data');
+    if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
+    client = createClient({ url: `file:${path.join(dbDir, 'db.sqlite')}` });
   }
 
-  db = new Database(DB_PATH);
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
-
-  initTables(db);
-  return db;
+  return client;
 }
 
-function initTables(db: Database.Database) {
-  db.exec(`
+let initialized = false;
+
+export async function ensureInit(): Promise<Client> {
+  const db = getDb();
+  if (initialized) return db;
+
+  await db.executeMultiple(`
     CREATE TABLE IF NOT EXISTS product_codes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       old_code TEXT NOT NULL,
@@ -77,10 +74,9 @@ function initTables(db: Database.Database) {
     );
   `);
 
-  // Insert default payment method mappings if empty
-  const count = db.prepare('SELECT COUNT(*) as cnt FROM payment_methods').get() as { cnt: number };
-  if (count.cnt === 0) {
-    const insert = db.prepare('INSERT INTO payment_methods (old_name, new_name) VALUES (?, ?)');
+  // Insert default payment methods if empty
+  const count = await db.execute('SELECT COUNT(*) as cnt FROM payment_methods');
+  if ((count.rows[0] as unknown as { cnt: number }).cnt === 0) {
     const defaults = [
       ['クレジットカード決済', 'クレジットカード'],
       ['ショッピングクレジット／ローン（ジャックス）', 'ショッピングクレジット／ローン'],
@@ -94,11 +90,21 @@ function initTables(db: Database.Database) {
       ['PayPay（残高）等', 'PayPay残高等'],
       ['PayPayあと払い', 'PayPayクレジット'],
     ];
-    const insertMany = db.transaction((rows: string[][]) => {
-      for (const row of rows) {
-        insert.run(row[0], row[1]);
-      }
-    });
-    insertMany(defaults);
+    const stmts = defaults.map(([old_name, new_name]) => ({
+      sql: 'INSERT INTO payment_methods (old_name, new_name) VALUES (?, ?)',
+      args: [old_name, new_name],
+    }));
+    await db.batch(stmts);
   }
+
+  initialized = true;
+  return db;
+}
+
+export async function recordImport(category: string, fileName: string, recordCount: number) {
+  const db = await ensureInit();
+  await db.execute({
+    sql: 'INSERT INTO import_history (category, file_name, record_count) VALUES (?, ?, ?)',
+    args: [category, fileName, recordCount],
+  });
 }

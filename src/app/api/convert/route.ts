@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'データが空です（ヘッダー行のみ）' }, { status: 400 });
     }
 
-    const result = converter(rows, brand);
+    const result = await converter(rows, brand);
 
     return NextResponse.json(result);
   } catch (error) {

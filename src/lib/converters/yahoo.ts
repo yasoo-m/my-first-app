@@ -75,7 +75,7 @@ function preprocessYahoo(rows: string[][]): ExpandedRow[] {
   return expanded;
 }
 
-export function convertYahoo(rows: string[][], brand: BrandType): ConversionResult {
+export async function convertYahoo(rows: string[][], brand: BrandType): Promise<ConversionResult> {
   const warnings: ConversionWarning[] = [];
   const errors: ConversionError[] = [];
   const resultRows = [];
@@ -87,14 +87,14 @@ export function convertYahoo(rows: string[][], brand: BrandType): ConversionResu
 
     try {
       const date = parseDate(item.orderTime);
-      const productCode = resolveProductCode(item.itemCode);
-      const costPrice = resolveCost(productCode, brand, i, warnings);
+      const productCode = await resolveProductCode(item.itemCode);
+      const costPrice = await resolveCost(productCode, brand, i, warnings);
       const quantity = parseInt(item.quantity, 10) || 0;
       const unitPrice = taxExclude(parseNumber(item.unitPrice)); // Tax-exclusive
       const shipCharge = taxExclude(parseNumber(item.shipCharge));
       const payCharge = taxExclude(parseNumber(item.payCharge));
       const shippingFee = shipCharge + payCharge;
-      const paymentMethod = resolvePaymentMethod(item.payMethod);
+      const paymentMethod = await resolvePaymentMethod(item.payMethod);
 
       if (quantity === 0) {
         warnings.push({ row: i + 1, column: 'M', message: '受注数が0です', type: 'quantity_zero' });

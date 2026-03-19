@@ -9,7 +9,7 @@ import { getStoreName, parseDate, parseNumber, taxExclude, resolveProductCode, r
 // BV(73): 商品番号, BX(75): 単価, BY(76): 個数
 // FA(156): システム連携用SKU番号
 
-export function convertRakuten(rows: string[][], brand: BrandType): ConversionResult {
+export async function convertRakuten(rows: string[][], brand: BrandType): Promise<ConversionResult> {
   const warnings: ConversionWarning[] = [];
   const errors: ConversionError[] = [];
   const resultRows = [];
@@ -38,13 +38,13 @@ export function convertRakuten(rows: string[][], brand: BrandType): ConversionRe
 
       // SKU priority: FA column first, then BV column
       const rawCode = skuNumber || productNumber;
-      const productCode = resolveProductCode(rawCode);
-      const costPrice = resolveCost(productCode, brand, i, warnings);
+      const productCode = await resolveProductCode(rawCode);
+      const costPrice = await resolveCost(productCode, brand, i, warnings);
 
       // Shipping fee: (送料合計 + 代引料合計) / 1.1 for tax exclusion
       const shippingFee = taxExclude(shippingTotal + codFee);
 
-      const paymentMethod = resolvePaymentMethod(payMethod);
+      const paymentMethod = await resolvePaymentMethod(payMethod);
 
       if (quantity === 0) {
         warnings.push({ row: i + 1, column: 'M', message: '受注数が0です', type: 'quantity_zero' });

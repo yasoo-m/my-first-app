@@ -5,7 +5,7 @@ import { recordImport } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get('q');
-  const data = query ? searchProductCodes(query) : getAllProductCodes();
+  const data = query ? await searchProductCodes(query) : await getAllProductCodes();
   return NextResponse.json(data);
 }
 
@@ -13,7 +13,6 @@ export async function POST(request: NextRequest) {
   const contentType = request.headers.get('content-type') || '';
 
   if (contentType.includes('multipart/form-data')) {
-    // CSV import
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const clearExisting = formData.get('clear') === 'true';
@@ -24,21 +23,19 @@ export async function POST(request: NextRequest) {
 
     const text = await file.text();
     const rows = parseCSV(text);
-    // Skip header if it looks like a header
     const dataRows = rows.length > 0 && rows[0][0]?.match(/^[a-zA-Zぁ-ん]/) ? rows.slice(1) : rows;
 
     if (clearExisting) {
-      clearProductCodes();
+      await clearProductCodes();
     }
 
-    const count = importProductCodes(dataRows);
-    recordImport('商品コード入替', file.name, count);
+    const count = await importProductCodes(dataRows);
+    await recordImport('商品コード入替', file.name, count);
     return NextResponse.json({ imported: count });
   }
 
-  // Single add
   const body = await request.json();
-  addProductCode(body);
+  await addProductCode(body);
   return NextResponse.json({ success: true });
 }
 
@@ -48,7 +45,7 @@ export async function PUT(request: NextRequest) {
   if (!id) {
     return NextResponse.json({ error: 'IDが必要です' }, { status: 400 });
   }
-  updateProductCode(id, mapping);
+  await updateProductCode(id, mapping);
   return NextResponse.json({ success: true });
 }
 
@@ -57,6 +54,6 @@ export async function DELETE(request: NextRequest) {
   if (!id) {
     return NextResponse.json({ error: 'IDが必要です' }, { status: 400 });
   }
-  deleteProductCode(parseInt(id, 10));
+  await deleteProductCode(parseInt(id, 10));
   return NextResponse.json({ success: true });
 }

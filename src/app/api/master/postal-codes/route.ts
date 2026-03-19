@@ -4,7 +4,7 @@ import { parseFile } from '@/lib/csv-parser';
 import { recordImport } from '@/lib/db';
 
 export async function GET() {
-  const count = getPostalCodeCount();
+  const count = await getPostalCodeCount();
   return NextResponse.json({ count });
 }
 
@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const rows = parseFile(buffer, file.name);
-    const count = importPostalCodes(rows);
-    recordImport('郵便番号データ', file.name, count);
+    const count = await importPostalCodes(rows);
+    await recordImport('郵便番号データ', file.name, count);
 
     return NextResponse.json({ imported: count });
   } catch (error) {

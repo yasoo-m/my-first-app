@@ -4,7 +4,7 @@ import { parseCSV } from '@/lib/csv-parser';
 import { recordImport } from '@/lib/db';
 
 export async function GET() {
-  const data = getAllPaymentMethods();
+  const data = await getAllPaymentMethods();
   return NextResponse.json(data);
 }
 
@@ -25,16 +25,16 @@ export async function POST(request: NextRequest) {
     const dataRows = rows.length > 0 && rows[0][0]?.match(/^[a-zA-Zぁ-ん]/) ? rows.slice(1) : rows;
 
     if (clearExisting) {
-      clearPaymentMethods();
+      await clearPaymentMethods();
     }
 
-    const count = importPaymentMethods(dataRows);
-    recordImport('支払方法入替', file.name, count);
+    const count = await importPaymentMethods(dataRows);
+    await recordImport('支払方法入替', file.name, count);
     return NextResponse.json({ imported: count });
   }
 
   const body = await request.json();
-  addPaymentMethod(body);
+  await addPaymentMethod(body);
   return NextResponse.json({ success: true });
 }
 
@@ -44,7 +44,7 @@ export async function PUT(request: NextRequest) {
   if (!id) {
     return NextResponse.json({ error: 'IDが必要です' }, { status: 400 });
   }
-  updatePaymentMethod(id, mapping);
+  await updatePaymentMethod(id, mapping);
   return NextResponse.json({ success: true });
 }
 
@@ -53,6 +53,6 @@ export async function DELETE(request: NextRequest) {
   if (!id) {
     return NextResponse.json({ error: 'IDが必要です' }, { status: 400 });
   }
-  deletePaymentMethod(parseInt(id, 10));
+  await deletePaymentMethod(parseInt(id, 10));
   return NextResponse.json({ success: true });
 }

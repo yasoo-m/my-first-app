@@ -4,8 +4,8 @@ import { parseFile } from '@/lib/csv-parser';
 import { recordImport } from '@/lib/db';
 
 export async function GET() {
-  const parts = getCostCount('parts');
-  const maqs = getCostCount('maqs');
+  const parts = await getCostCount('parts');
+  const maqs = await getCostCount('maqs');
   return NextResponse.json({ parts, maqs, total: parts + maqs });
 }
 
@@ -26,11 +26,10 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const rows = parseFile(buffer, file.name);
 
-    // Skip header if first row looks like a header
     const dataRows = rows.length > 0 && isNaN(parseInt(rows[0][1])) ? rows.slice(1) : rows;
-    const count = importCosts(dataRows, brandType);
+    const count = await importCosts(dataRows, brandType);
     const label = brandType === 'parts' ? '原価データ（パーツ）' : '原価データ（MAQs）';
-    recordImport(label, file.name, count);
+    await recordImport(label, file.name, count);
 
     return NextResponse.json({ imported: count, brandType });
   } catch (error) {

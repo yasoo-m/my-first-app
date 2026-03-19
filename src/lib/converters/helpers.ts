@@ -41,13 +41,13 @@ export function cleanProductCode(code: string): string {
   return code.replace(/["=]/g, '');
 }
 
-export function resolveProductCode(code: string): string {
+export async function resolveProductCode(code: string): Promise<string> {
   const cleaned = cleanProductCode(code);
-  return replaceProductCode(cleaned);
+  return await replaceProductCode(cleaned);
 }
 
-export function resolveCost(productCode: string, brand: BrandType, rowIndex: number, warnings: ConversionWarning[]): number | null {
-  const cost = lookupCost(productCode, brand);
+export async function resolveCost(productCode: string, brand: BrandType, rowIndex: number, warnings: ConversionWarning[]): Promise<number | null> {
+  const cost = await lookupCost(productCode, brand);
   if (cost === null && productCode) {
     warnings.push({
       row: rowIndex + 1,
@@ -59,11 +59,11 @@ export function resolveCost(productCode: string, brand: BrandType, rowIndex: num
   return cost;
 }
 
-export function resolvePaymentMethod(method: string): string {
-  return replacePaymentMethod(method);
+export async function resolvePaymentMethod(method: string): Promise<string> {
+  return await replacePaymentMethod(method);
 }
 
-export function resolvePostalCode(postalCode: string, rowIndex: number, warnings: ConversionWarning[]): { prefecture: string; city: string } {
+export async function resolvePostalCode(postalCode: string, rowIndex: number, warnings: ConversionWarning[]): Promise<{ prefecture: string; city: string }> {
   if (!postalCode || postalCode.length !== 7) {
     if (postalCode && postalCode.length > 0) {
       warnings.push({
@@ -75,7 +75,7 @@ export function resolvePostalCode(postalCode: string, rowIndex: number, warnings
     }
     return { prefecture: '', city: '' };
   }
-  const entry = lookupPostalCode(postalCode);
+  const entry = await lookupPostalCode(postalCode);
   return entry ? { prefecture: entry.prefecture, city: entry.city } : { prefecture: '', city: '' };
 }
 

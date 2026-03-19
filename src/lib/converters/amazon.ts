@@ -6,7 +6,7 @@ import { getStoreName, parseDate, parseNumber, removeHyphen, resolveProductCode,
 // O(14): quantity-purchased, Q(16): item-price, R(17): item-tax
 // S(18): shipping-price, T(19): shipping-tax, AA(26): ship-postal-code
 
-export function convertAmazon(rows: string[][], brand: BrandType): ConversionResult {
+export async function convertAmazon(rows: string[][], brand: BrandType): Promise<ConversionResult> {
   const warnings: ConversionWarning[] = [];
   const errors: ConversionError[] = [];
   const resultRows = [];
@@ -29,9 +29,9 @@ export function convertAmazon(rows: string[][], brand: BrandType): ConversionRes
 
       const date = parseDate(purchaseDate.substring(0, 10));
       const postalCode = removeHyphen(rawPostalCode);
-      const { prefecture, city } = resolvePostalCode(postalCode, i, warnings);
-      const productCode = resolveProductCode(asin);
-      const costPrice = resolveCost(productCode, brand, i, warnings);
+      const { prefecture, city } = await resolvePostalCode(postalCode, i, warnings);
+      const productCode = await resolveProductCode(asin);
+      const costPrice = await resolveCost(productCode, brand, i, warnings);
 
       const totalAmount = itemPrice - itemTax;
       const shippingFee = shippingPrice - shippingTax;

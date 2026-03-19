@@ -8,7 +8,7 @@ import { getStoreName, parseDate, parseNumber, taxExclude, resolveProductCode, r
 // O(14): 商品コード（前半）, P(15): 商品コード（後半）
 // R(17): 会員番号, S(18): 受注番号
 
-export function convertMakeshop(rows: string[][], brand: BrandType): ConversionResult {
+export async function convertMakeshop(rows: string[][], brand: BrandType): Promise<ConversionResult> {
   const warnings: ConversionWarning[] = [];
   const errors: ConversionError[] = [];
   const resultRows = [];
@@ -37,13 +37,13 @@ export function convertMakeshop(rows: string[][], brand: BrandType): ConversionR
 
       // Combine product code parts
       const rawCode = codePrefix + codeSuffix;
-      const productCode = resolveProductCode(rawCode);
-      const costPrice = resolveCost(productCode, brand, i, warnings);
+      const productCode = await resolveProductCode(rawCode);
+      const costPrice = await resolveCost(productCode, brand, i, warnings);
 
       // Shipping: (送料 / 1.1) + (代引手数料 / 1.1)
       const shippingFee = taxExclude(shippingTaxIncl) + taxExclude(codFeeTaxIncl);
 
-      const paymentMethod = resolvePaymentMethod(payMethod);
+      const paymentMethod = await resolvePaymentMethod(payMethod);
 
       if (quantity === 0) {
         warnings.push({ row: i + 1, column: 'M', message: '受注数が0です', type: 'quantity_zero' });
