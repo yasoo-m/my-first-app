@@ -1,0 +1,172 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1">
+  <diagram id="architecture" name="アーキテクチャ">
+    <mxGraphModel dx="1426" dy="841" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;" value="売上データ変換ツール - アーキテクチャ図" vertex="1">
+          <mxGeometry height="40" width="500" x="450" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="user" parent="1" style="shape=actor;whiteSpace=wrap;html=1;fontSize=14;fillColor=#4CAF50;strokeColor=#357A38;fontColor=#FFFFFF;" value="ユーザー" vertex="1">
+          <mxGeometry height="80" width="60" x="80" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="browser" parent="1" style="shape=mxgraph.cisco.computers_and_peripherals.web_browser;whiteSpace=wrap;html=1;fontSize=12;fillColor=#4A86C8;strokeColor=#2D5F8A;fontColor=#FFFFFF;" value="ブラウザ" vertex="1">
+          <mxGeometry height="90" width="80" x="200" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="frontend_group" parent="1" style="swimlane;startSize=30;fillColor=#4A86C8;strokeColor=#2D5F8A;fontSize=14;fontStyle=1;rounded=1;fontColor=#FFFFFF;" value="フロントエンド (React / Next.js)" vertex="1">
+          <mxGeometry height="280" width="340" x="350" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="page_home" parent="frontend_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=10;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" value="売上データ変換ページ&#xa;(src/app/page.tsx)&#xa;&#xa;- モール選択&#xa;- ブランド選択&#xa;- CSV/Excelアップロード&#xa;- 変換結果プレビュー&#xa;- Excelダウンロード" vertex="1">
+          <mxGeometry height="145" width="150" x="15" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="page_master" parent="frontend_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=10;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" value="マスタデータ管理ページ&#xa;(src/app/master/page.tsx)&#xa;&#xa;- 商品コード管理&#xa;- 支払方法管理&#xa;- 郵便番号管理&#xa;- 原価管理&#xa;- インポート履歴" vertex="1">
+          <mxGeometry height="145" width="150" x="175" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ui_components" parent="frontend_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" value="UIコンポーネント (shadcn/ui)&#xa;Button, Card, Table, Select, Dialog, Tabs..." vertex="1">
+          <mxGeometry height="55" width="310" x="15" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="backend_group" parent="1" style="swimlane;startSize=30;fillColor=#D4A017;strokeColor=#A07A10;fontSize=14;fontStyle=1;rounded=1;fontColor=#FFFFFF;" value="バックエンド (Next.js API Routes)" vertex="1">
+          <mxGeometry height="280" width="340" x="350" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="api_convert" parent="backend_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#e3c800;strokeColor=#B09500;fontColor=#000000;" value="POST /api/convert&#xa;CSV/Excel変換API" vertex="1">
+          <mxGeometry height="45" width="150" x="15" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="api_download" parent="backend_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#e3c800;strokeColor=#B09500;fontColor=#000000;" value="POST /api/download&#xa;Excelダウンロード" vertex="1">
+          <mxGeometry height="45" width="150" x="175" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="api_master" parent="backend_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;spacingLeft=10;fillColor=#e3c800;strokeColor=#B09500;fontColor=#000000;" value="マスタAPI群&#xa;/api/master/product-codes&#xa;/api/master/payment-methods&#xa;/api/master/postal-codes&#xa;/api/master/cost&#xa;/api/master/cost-export&#xa;/api/master/postal-export&#xa;/api/master/import-history&#xa;/api/master/sample" vertex="1">
+          <mxGeometry height="130" width="310" x="15" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="csv_parser" parent="backend_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e3c800;strokeColor=#B09500;fontColor=#000000;" value="CSVパーサー&#xa;(encoding-japanese / papaparse)" vertex="1">
+          <mxGeometry height="30" width="150" x="15" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="excel_export" parent="backend_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e3c800;strokeColor=#B09500;fontColor=#000000;" value="Excel出力&#xa;(exceljs)" vertex="1">
+          <mxGeometry height="30" width="150" x="175" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="converter_group" parent="1" style="swimlane;startSize=25;fillColor=#7B4F9E;strokeColor=#5C3A78;fontSize=13;fontStyle=1;rounded=1;fontColor=#FFFFFF;" value="コンバーター (src/lib/converters/)" vertex="1">
+          <mxGeometry height="175" width="370" x="750" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="conv_amazon" parent="converter_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" value="Amazon" vertex="1">
+          <mxGeometry height="30" width="100" x="15" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="conv_rakuten" parent="converter_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" value="楽天市場" vertex="1">
+          <mxGeometry height="30" width="100" x="130" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="conv_yahoo" parent="converter_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" value="Yahoo!" vertex="1">
+          <mxGeometry height="30" width="100" x="245" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="conv_makeshop" parent="converter_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" value="MakeShop" vertex="1">
+          <mxGeometry height="30" width="100" x="15" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="conv_mercari" parent="converter_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" value="メルカリ" vertex="1">
+          <mxGeometry height="30" width="100" x="130" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="conv_aupay" parent="converter_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" value="au PAY" vertex="1">
+          <mxGeometry height="30" width="100" x="245" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="conv_helpers" parent="converter_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" value="helpers.ts (共通変換ロジック: 商品コード変換, 原価取得, 郵便番号検索, 支払方法変換)" vertex="1">
+          <mxGeometry height="40" width="330" x="15" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="master_group" parent="1" style="swimlane;startSize=25;fillColor=#C0504D;strokeColor=#8B3A38;fontSize=13;fontStyle=1;rounded=1;fontColor=#FFFFFF;" value="マスタデータ層 (src/lib/masters/)" vertex="1">
+          <mxGeometry height="80" width="370" x="750" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="master_product" parent="master_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fa6800;strokeColor=#C73500;fontColor=#000000;" value="商品コード" vertex="1">
+          <mxGeometry height="30" width="80" x="10" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="master_payment" parent="master_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fa6800;strokeColor=#C73500;fontColor=#000000;" value="支払方法" vertex="1">
+          <mxGeometry height="30" width="80" x="100" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="master_postal" parent="master_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fa6800;strokeColor=#C73500;fontColor=#000000;" value="郵便番号" vertex="1">
+          <mxGeometry height="30" width="80" x="190" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="master_cost" parent="master_group" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fa6800;strokeColor=#C73500;fontColor=#000000;" value="原価" vertex="1">
+          <mxGeometry height="30" width="80" x="280" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="db_group" parent="1" style="swimlane;startSize=0;fillColor=none;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="120" width="370" x="750" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="db_local" parent="db_group" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fontSize=11;fillColor=#555555;strokeColor=#333333;fontColor=#FFFFFF;" value="SQLite&#xa;(ローカル開発)&#xa;src/data/db.sqlite" vertex="1">
+          <mxGeometry height="80" width="130" x="30" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="db_turso" parent="db_group" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fontSize=11;fillColor=#555555;strokeColor=#333333;fontColor=#FFFFFF;" value="Turso&#xa;(本番環境)&#xa;リモートDB" vertex="1">
+          <mxGeometry height="80" width="130" x="210" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="db_switch" parent="db_group" style="rhombus;whiteSpace=wrap;html=1;fontSize=10;fillColor=#D4A017;strokeColor=#A07A10;fontColor=#FFFFFF;" value="db.ts&#xa;(環境で自動切替)" vertex="1">
+          <mxGeometry height="70" width="80" x="145" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="vercel" parent="1" style="shape=cloud;whiteSpace=wrap;html=1;fontSize=13;fontStyle=1;fillColor=#4CAF50;strokeColor=#357A38;fontColor=#FFFFFF;" value="Vercel&#xa;(ホスティング)" vertex="1">
+          <mxGeometry height="100" width="180" x="1180" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="github" parent="1" style="shape=parallelogram;whiteSpace=wrap;html=1;fontSize=11;fillColor=#555555;strokeColor=#333333;fontColor=#FFFFFF;" value="GitHub&#xa;yasoo-m/my-first-app" vertex="1">
+          <mxGeometry height="60" width="180" x="1180" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="input_files" parent="1" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=0.27;fontSize=11;fillColor=#7B4F9E;strokeColor=#5C3A78;fontColor=#FFFFFF;" value="入力ファイル&#xa;CSV / Excel&#xa;(各モール形式)" vertex="1">
+          <mxGeometry height="70" width="120" x="80" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="output_files" parent="1" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=0.27;fontSize=11;fillColor=#4CAF50;strokeColor=#357A38;fontColor=#FFFFFF;" value="出力ファイル&#xa;統一フォーマット&#xa;Excel (.xlsx)" vertex="1">
+          <mxGeometry height="70" width="120" x="80" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="user" style="edgeStyle=orthogonalEdgeStyle;" target="browser">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="browser" style="edgeStyle=orthogonalEdgeStyle;" target="frontend_group" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="input_files" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="browser" value="アップロード">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="browser" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="output_files" value="ダウンロード">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="frontend_group" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;fontStyle=1;" target="backend_group" value="API呼び出し&#xa;(fetch)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="api_convert" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="converter_group" value="変換処理">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="463" />
+              <mxPoint x="720" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="conv_helpers" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="master_group" value="参照">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="api_master" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="master_group" value="CRUD">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="565" />
+              <mxPoint x="720" y="650" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="master_group" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="db_switch" value="@libsql/client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="db_switch" style="" target="db_local" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="db_switch" style="" target="db_turso" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="github" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="vercel" value="自動デプロイ">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="vercel" style="edgeStyle=orthogonalEdgeStyle;dashed=1;fontSize=10;" target="frontend_group" value="ホスティング">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1170" y="230" />
+              <mxPoint x="1170" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="unified_format" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fontSize=10;fillColor=#D4A017;strokeColor=#A07A10;fontColor=#FFFFFF;align=left;spacingLeft=10;" value="統一出力フォーマット (18列)&#xa;出荷日 / 出荷月 / 郵便番号 / 都道府県 / 市町村&#xa;受注番号 / 会員番号 / 店舗名称 / 商品コード / 原価&#xa;原価計 / 小計 / 受注数 / 合計 / 配送料 / 総売上 / 粗利 / 支払方法" vertex="1">
+          <mxGeometry height="90" width="320" x="1180" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="db_tables" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fontSize=10;fillColor=#555555;strokeColor=#333333;fontColor=#FFFFFF;align=left;spacingLeft=10;" value="DBテーブル:&#xa;- product_codes (商品コード変換)&#xa;- payment_methods (支払方法変換)&#xa;- postal_codes (郵便番号マスタ)&#xa;- costs (原価マスタ)&#xa;- import_history (インポート履歴)" vertex="1">
+          <mxGeometry height="110" width="250" x="1180" y="570" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

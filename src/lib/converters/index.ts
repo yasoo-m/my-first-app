@@ -3,16 +3,18 @@ import { convertAmazon } from './amazon';
 import { convertRakuten } from './rakuten';
 import { convertYahoo } from './yahoo';
 import { convertMakeshop } from './makeshop';
+import { convertMercari } from './mercari';
+import { convertAupay } from './aupay';
 
 export type Converter = (rows: string[][], brand: BrandType) => Promise<ConversionResult>;
 
-const converters: Record<MallType, Converter | null> = {
+const converters: Record<MallType, Converter> = {
   amazon: convertAmazon,
   rakuten: convertRakuten,
   yahoo: convertYahoo,
   makeshop: convertMakeshop,
-  mercari: null,
-  aupay: null,
+  mercari: convertMercari,
+  aupay: convertAupay,
 };
 
 export function getConverter(mall: MallType): Converter | null {

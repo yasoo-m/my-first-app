@@ -16,7 +16,7 @@ const MALL_OPTIONS: { value: MallType; label: string; logo: string }[] = [
   { value: 'rakuten', label: '楽天市場', logo: 'https://www.google.com/s2/favicons?domain=rakuten.co.jp&sz=32' },
   { value: 'yahoo', label: 'ヤフーショッピング', logo: 'https://www.google.com/s2/favicons?domain=shopping.yahoo.co.jp&sz=32' },
   { value: 'makeshop', label: 'メイクショップ', logo: 'https://www.google.com/s2/favicons?domain=makeshop.jp&sz=32' },
-  { value: 'mercari', label: 'メルカリ', logo: 'https://www.google.com/s2/favicons?domain=mercari.com&sz=32' },
+  { value: 'mercari', label: 'メルカリショップス', logo: 'https://www.google.com/s2/favicons?domain=mercari.com&sz=32' },
   { value: 'aupay', label: 'au PAYマーケット', logo: 'https://www.google.com/s2/favicons?domain=wowma.jp&sz=32' },
 ];
 

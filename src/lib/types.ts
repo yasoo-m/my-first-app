@@ -7,7 +7,7 @@ export const MALL_LABELS: Record<MallType, string> = {
   rakuten: '楽天市場',
   yahoo: 'ヤフーショッピング',
   makeshop: 'メイクショップ',
-  mercari: 'メルカリ',
+  mercari: 'メルカリショップス',
   aupay: 'au PAYマーケット',
 };
 
@@ -21,14 +21,14 @@ export const STORE_NAMES: Record<`${BrandType}_${MallType}`, string> = {
   cllink_rakuten: 'C.L.LINK 楽天',
   cllink_yahoo: 'C.L.LINK ショッピング',
   cllink_makeshop: 'C.L.LINK MakeShop',
-  cllink_mercari: 'C.L.LINK メルカリ',
-  cllink_aupay: 'C.L.LINK au PAY',
+  cllink_mercari: 'C.L.LINK メルカリショップス',
+  cllink_aupay: 'C.L.LINK aupayマーケット',
   maqs_amazon: 'MAQs Amazon',
   maqs_rakuten: 'MAQs 楽天',
   maqs_yahoo: 'MAQs ショッピング',
   maqs_makeshop: 'MAQs MakeShop',
-  maqs_mercari: 'MAQs メルカリ',
-  maqs_aupay: 'MAQs au PAY',
+  maqs_mercari: 'MAQs メルカリショップス',
+  maqs_aupay: 'MAQs aupayマーケット',
 };
 
 export interface UnifiedRow {
