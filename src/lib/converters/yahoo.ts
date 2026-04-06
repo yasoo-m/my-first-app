@@ -1,5 +1,5 @@
 import type { BrandType, ConversionResult, ConversionWarning, ConversionError } from '../types';
-import { getStoreName, parseDate, parseNumber, taxExclude, resolveProductCode, resolveCost, resolvePaymentMethod, buildRow } from './helpers';
+import { getStoreName, parseDate, parseNumber, taxExclude, resolveProductCode, resolveCost, resolvePaymentMethod, loadMasterCaches, clearMasterCaches, buildRow } from './helpers';
 
 // Yahoo Shopping CSV columns (0-indexed):
 // A(0): OrderId, B(1): ShipPrefecture, C(2): ShipCity
@@ -82,42 +82,47 @@ export async function convertYahoo(rows: string[][], brand: BrandType): Promise<
 
   const expanded = preprocessYahoo(rows);
 
-  for (let i = 0; i < expanded.length; i++) {
-    const item = expanded[i];
+  await loadMasterCaches();
+  try {
+    for (let i = 0; i < expanded.length; i++) {
+      const item = expanded[i];
 
-    try {
-      const date = parseDate(item.orderTime);
-      const productCode = await resolveProductCode(item.itemCode);
-      const costPrice = await resolveCost(productCode, brand, i, warnings);
-      const quantity = parseInt(item.quantity, 10) || 0;
-      const unitPrice = taxExclude(parseNumber(item.unitPrice)); // Tax-exclusive
-      const shipCharge = taxExclude(parseNumber(item.shipCharge));
-      const payCharge = taxExclude(parseNumber(item.payCharge));
-      const shippingFee = shipCharge + payCharge;
-      const paymentMethod = await resolvePaymentMethod(item.payMethod);
+      try {
+        const date = parseDate(item.orderTime);
+        const productCode = resolveProductCode(item.itemCode);
+        const costPrice = resolveCost(productCode, brand, i, warnings);
+        const quantity = parseInt(item.quantity, 10) || 0;
+        const unitPrice = taxExclude(parseNumber(item.unitPrice)); // Tax-exclusive
+        const shipCharge = taxExclude(parseNumber(item.shipCharge));
+        const payCharge = taxExclude(parseNumber(item.payCharge));
+        const shippingFee = shipCharge + payCharge;
+        const paymentMethod = resolvePaymentMethod(item.payMethod);
 
-      if (quantity === 0) {
-        warnings.push({ row: i + 1, column: 'M', message: '受注数が0です', type: 'quantity_zero' });
+        if (quantity === 0) {
+          warnings.push({ row: i + 1, column: 'M', message: '受注数が0です', type: 'quantity_zero' });
+        }
+
+        resultRows.push(buildRow({
+          date,
+          postalCode: '', // Yahoo doesn't provide postal code
+          prefecture: item.prefecture,
+          city: item.city,
+          orderNumber: item.orderId,
+          memberNumber: '',
+          storeName: getStoreName(brand, 'yahoo'),
+          productCode,
+          costPrice,
+          subtotal: unitPrice,
+          quantity,
+          shippingFee,
+          paymentMethod,
+        }));
+      } catch (e) {
+        errors.push({ row: i + 1, column: '', message: `行の処理中にエラー: ${e}`, type: 'parse_error' });
       }
-
-      resultRows.push(buildRow({
-        date,
-        postalCode: '', // Yahoo doesn't provide postal code
-        prefecture: item.prefecture,
-        city: item.city,
-        orderNumber: item.orderId,
-        memberNumber: '',
-        storeName: getStoreName(brand, 'yahoo'),
-        productCode,
-        costPrice,
-        subtotal: unitPrice,
-        quantity,
-        shippingFee,
-        paymentMethod,
-      }));
-    } catch (e) {
-      errors.push({ row: i + 1, column: '', message: `行の処理中にエラー: ${e}`, type: 'parse_error' });
     }
+  } finally {
+    clearMasterCaches();
   }
 
   return { rows: resultRows, warnings, errors };

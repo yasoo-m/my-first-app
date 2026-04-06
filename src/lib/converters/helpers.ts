@@ -1,9 +1,54 @@
 import type { BrandType, ConversionWarning, UnifiedRow } from '../types';
 import { STORE_NAMES, type MallType } from '../types';
-import { replaceProductCode } from '../masters/product-code';
-import { replacePaymentMethod } from '../masters/payment-method';
-import { lookupPostalCode } from '../masters/postal-code';
-import { lookupCost } from '../masters/cost';
+import { ensureInit } from '../db';
+
+// ---- Master data caches (loaded once before conversion) ----
+let productCodeCache: Map<string, string> | null = null;
+let costCache: Map<string, number> | null = null;  // key: "productCode:brandType"
+let paymentMethodCache: Map<string, string> | null = null;
+let postalCodeCache: Map<string, { prefecture: string; city: string }> | null = null;
+
+export async function loadMasterCaches(): Promise<void> {
+  const db = await ensureInit();
+
+  const [productCodes, costs, paymentMethods, postalCodes] = await Promise.all([
+    db.execute('SELECT old_code, new_code FROM product_codes'),
+    db.execute('SELECT product_code, cost, brand_type FROM costs'),
+    db.execute('SELECT old_name, new_name FROM payment_methods'),
+    db.execute('SELECT postal_code, prefecture, city FROM postal_codes'),
+  ]);
+
+  productCodeCache = new Map();
+  for (const row of productCodes.rows) {
+    const r = row as unknown as { old_code: string; new_code: string };
+    productCodeCache.set(r.old_code, r.new_code);
+  }
+
+  costCache = new Map();
+  for (const row of costs.rows) {
+    const r = row as unknown as { product_code: string; cost: number; brand_type: string };
+    costCache.set(`${r.product_code}:${r.brand_type}`, r.cost);
+  }
+
+  paymentMethodCache = new Map();
+  for (const row of paymentMethods.rows) {
+    const r = row as unknown as { old_name: string; new_name: string };
+    paymentMethodCache.set(r.old_name, r.new_name);
+  }
+
+  postalCodeCache = new Map();
+  for (const row of postalCodes.rows) {
+    const r = row as unknown as { postal_code: string; prefecture: string; city: string };
+    postalCodeCache.set(r.postal_code, { prefecture: r.prefecture, city: r.city });
+  }
+}
+
+export function clearMasterCaches(): void {
+  productCodeCache = null;
+  costCache = null;
+  paymentMethodCache = null;
+  postalCodeCache = null;
+}
 
 export function getStoreName(brand: BrandType, mall: MallType): string {
   return STORE_NAMES[`${brand}_${mall}`] || '';
@@ -41,29 +86,48 @@ export function cleanProductCode(code: string): string {
   return code.replace(/["=]/g, '');
 }
 
-export async function resolveProductCode(code: string): Promise<string> {
+export function resolveProductCode(code: string): string {
   const cleaned = cleanProductCode(code);
-  return await replaceProductCode(cleaned);
-}
-
-export async function resolveCost(productCode: string, brand: BrandType, rowIndex: number, warnings: ConversionWarning[]): Promise<number | null> {
-  const cost = await lookupCost(productCode, brand);
-  if (cost === null && productCode) {
-    warnings.push({
-      row: rowIndex + 1,
-      column: 'J',
-      message: `商品コード「${productCode}」の原価が見つかりません`,
-      type: 'cost_not_found',
-    });
+  if (productCodeCache) {
+    return productCodeCache.get(cleaned) ?? cleaned;
   }
-  return cost;
+  return cleaned;
 }
 
-export async function resolvePaymentMethod(method: string): Promise<string> {
-  return await replacePaymentMethod(method);
+export function resolveCost(productCode: string, brand: BrandType, rowIndex: number, warnings: ConversionWarning[]): number | null {
+  const brandType = brand === 'cllink' ? 'parts' : 'maqs';
+
+  let cost: number | undefined;
+  if (costCache) {
+    cost = costCache.get(`${productCode}:${brandType}`);
+    // For MAQs, fallback to parts
+    if (cost === undefined && brandType === 'maqs') {
+      cost = costCache.get(`${productCode}:parts`);
+    }
+  }
+
+  if (cost === undefined) {
+    if (productCode) {
+      warnings.push({
+        row: rowIndex + 1,
+        column: 'J',
+        message: `商品コード「${productCode}」の原価が見つかりません`,
+        type: 'cost_not_found',
+      });
+    }
+    return null;
+  }
+  return Math.round(cost);
 }
 
-export async function resolvePostalCode(postalCode: string, rowIndex: number, warnings: ConversionWarning[]): Promise<{ prefecture: string; city: string }> {
+export function resolvePaymentMethod(method: string): string {
+  if (paymentMethodCache) {
+    return paymentMethodCache.get(method) ?? method;
+  }
+  return method;
+}
+
+export function resolvePostalCode(postalCode: string, rowIndex: number, warnings: ConversionWarning[]): { prefecture: string; city: string } {
   if (!postalCode || postalCode.length !== 7) {
     if (postalCode && postalCode.length > 0) {
       warnings.push({
@@ -75,8 +139,11 @@ export async function resolvePostalCode(postalCode: string, rowIndex: number, wa
     }
     return { prefecture: '', city: '' };
   }
-  const entry = await lookupPostalCode(postalCode);
-  return entry ? { prefecture: entry.prefecture, city: entry.city } : { prefecture: '', city: '' };
+  if (postalCodeCache) {
+    const entry = postalCodeCache.get(postalCode);
+    return entry ? { prefecture: entry.prefecture, city: entry.city } : { prefecture: '', city: '' };
+  }
+  return { prefecture: '', city: '' };
 }
 
 export function buildRow(params: {

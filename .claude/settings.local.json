@@ -42,7 +42,11 @@
       "Bash(where turso:*)",
       "Bash(powershell -Command \"irm https://get.tur.so/install.ps1 | iex\")",
       "Bash(powershell -Command \"irm https://get.tur.so/install.ps1 -UseBasicParsing\")",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(npx tsc:*)",
+      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:$HOME/.nvm/versions/node/*/bin:$PATH\")",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(npx -p typescript tsc --noEmit --project tsconfig.json)"
     ]
   }
 }
