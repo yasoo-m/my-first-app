@@ -13,8 +13,24 @@ export async function lookupPostalCode(postalCode: string): Promise<PostalCodeEn
   return null;
 }
 
+export async function clearPostalCodes(): Promise<void> {
+  const db = await ensureInit();
+  await db.execute('DELETE FROM postal_codes');
+}
+
+export async function searchPostalCodes(query: string): Promise<{ postal_code: string; prefecture: string; city: string }[]> {
+  const db = await ensureInit();
+  const result = await db.execute({
+    sql: 'SELECT postal_code, prefecture, city FROM postal_codes WHERE postal_code LIKE ? OR prefecture LIKE ? OR city LIKE ? ORDER BY postal_code LIMIT 200',
+    args: [`%${query}%`, `%${query}%`, `%${query}%`],
+  });
+  return result.rows as unknown as { postal_code: string; prefecture: string; city: string }[];
+}
+
 export async function importPostalCodes(rows: string[][]): Promise<number> {
   const db = await ensureInit();
+  // Clear existing postal codes before import
+  await db.execute('DELETE FROM postal_codes');
   const stmts = [];
   for (const row of rows) {
     if (row.length >= 8) {
@@ -37,9 +53,12 @@ export async function importPostalCodes(rows: string[][]): Promise<number> {
   return stmts.length;
 }
 
-export async function getAllPostalCodes(): Promise<{ postal_code: string; prefecture: string; city: string }[]> {
+export async function getAllPostalCodes(limit = 200): Promise<{ postal_code: string; prefecture: string; city: string }[]> {
   const db = await ensureInit();
-  const result = await db.execute('SELECT postal_code, prefecture, city FROM postal_codes ORDER BY postal_code');
+  const result = await db.execute({
+    sql: 'SELECT postal_code, prefecture, city FROM postal_codes ORDER BY postal_code LIMIT ?',
+    args: [limit],
+  });
   return result.rows as unknown as { postal_code: string; prefecture: string; city: string }[];
 }
 

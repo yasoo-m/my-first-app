@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAllPostalCodes } from '@/lib/masters/postal-code';
 
 export async function GET() {
-  const codes = await getAllPostalCodes();
+  const codes = await getAllPostalCodes(999999);
   const csv = [
     '郵便番号,都道府県,市区町村',
     ...codes.map(c => `${c.postal_code},${c.prefecture},${c.city}`),

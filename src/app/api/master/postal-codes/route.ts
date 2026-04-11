@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { importPostalCodes, getPostalCodeCount } from '@/lib/masters/postal-code';
+import { importPostalCodes, getPostalCodeCount, getAllPostalCodes, searchPostalCodes } from '@/lib/masters/postal-code';
 import { parseFile } from '@/lib/csv-parser';
 import { recordImport } from '@/lib/db';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const query = request.nextUrl.searchParams.get('q');
+  const list = request.nextUrl.searchParams.get('list');
+
+  if (list === 'true') {
+    const data = query ? await searchPostalCodes(query) : await getAllPostalCodes();
+    const count = await getPostalCodeCount();
+    return NextResponse.json({ items: data, count });
+  }
+
   const count = await getPostalCodeCount();
   return NextResponse.json({ count });
 }

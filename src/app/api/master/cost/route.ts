@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { importCosts, getCostCount } from '@/lib/masters/cost';
+import { importCosts, getCostCount, getAllCosts, searchCosts } from '@/lib/masters/cost';
 import { parseFile } from '@/lib/csv-parser';
 import { recordImport } from '@/lib/db';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const brandType = request.nextUrl.searchParams.get('brandType') as 'parts' | 'maqs' | null;
+  const query = request.nextUrl.searchParams.get('q');
+
+  if (brandType) {
+    const data = query ? await searchCosts(brandType, query) : await getAllCosts(brandType);
+    const parts = await getCostCount('parts');
+    const maqs = await getCostCount('maqs');
+    return NextResponse.json({ items: data, parts, maqs, total: parts + maqs });
+  }
+
   const parts = await getCostCount('parts');
   const maqs = await getCostCount('maqs');
   return NextResponse.json({ parts, maqs, total: parts + maqs });

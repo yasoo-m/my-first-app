@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'ブランド種別が不正です' }, { status: 400 });
   }
 
-  const costs = await getAllCosts(brandType);
+  const costs = await getAllCosts(brandType, 999999);
   const csv = [
     '商品コード,原価',
     ...costs.map(c => `${c.product_code},${c.cost}`),

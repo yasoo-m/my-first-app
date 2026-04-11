@@ -54,11 +54,20 @@ export async function importCosts(rows: string[][], brandType: 'parts' | 'maqs')
   return stmts.length;
 }
 
-export async function getAllCosts(brandType: 'parts' | 'maqs'): Promise<{ product_code: string; cost: number }[]> {
+export async function getAllCosts(brandType: 'parts' | 'maqs', limit = 200): Promise<{ product_code: string; cost: number }[]> {
   const db = await ensureInit();
   const result = await db.execute({
-    sql: 'SELECT product_code, cost FROM costs WHERE brand_type = ? ORDER BY product_code',
-    args: [brandType],
+    sql: 'SELECT product_code, cost FROM costs WHERE brand_type = ? ORDER BY product_code LIMIT ?',
+    args: [brandType, limit],
+  });
+  return result.rows as unknown as { product_code: string; cost: number }[];
+}
+
+export async function searchCosts(brandType: 'parts' | 'maqs', query: string): Promise<{ product_code: string; cost: number }[]> {
+  const db = await ensureInit();
+  const result = await db.execute({
+    sql: 'SELECT product_code, cost FROM costs WHERE brand_type = ? AND (product_code LIKE ? OR CAST(cost AS TEXT) LIKE ?) ORDER BY product_code LIMIT 200',
+    args: [brandType, `%${query}%`, `%${query}%`],
   });
   return result.rows as unknown as { product_code: string; cost: number }[];
 }

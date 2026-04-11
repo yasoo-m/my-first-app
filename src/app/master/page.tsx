@@ -146,7 +146,7 @@ function ProductCodesTab({ showMessage }: { showMessage: (msg: string, type?: 's
     setLoading(true);
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('clear', 'false');
+    formData.append('clear', 'true');
     const res = await fetch('/api/master/product-codes', { method: 'POST', body: formData });
     const data = await res.json();
     setLoading(false);
@@ -308,7 +308,7 @@ function PaymentMethodsTab({ showMessage }: { showMessage: (msg: string, type?: 
     setLoading(true);
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('clear', 'false');
+    formData.append('clear', 'true');
     const res = await fetch('/api/master/payment-methods', { method: 'POST', body: formData });
     const data = await res.json();
     setLoading(false);
@@ -414,16 +414,21 @@ function PaymentMethodsTab({ showMessage }: { showMessage: (msg: string, type?: 
 /* ── Cost Tab ── */
 function CostTab({ showMessage }: { showMessage: (msg: string, type?: 'success' | 'error') => void }) {
   const [counts, setCounts] = useState({ parts: 0, maqs: 0, total: 0 });
+  const [items, setItems] = useState<{ product_code: string; cost: number }[]>([]);
   const [brandType, setBrandType] = useState<'parts' | 'maqs'>('parts');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const fetchCounts = useCallback(async () => {
-    const res = await fetch('/api/master/cost');
+  const fetchData = useCallback(async () => {
+    const params = new URLSearchParams({ brandType });
+    if (search) params.set('q', search);
+    const res = await fetch(`/api/master/cost?${params}`);
     const data = await res.json();
-    setCounts(data);
-  }, []);
+    setCounts({ parts: data.parts, maqs: data.maqs, total: data.total });
+    setItems(data.items || []);
+  }, [brandType, search]);
 
-  useEffect(() => { fetchCounts(); }, [fetchCounts]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -437,7 +442,7 @@ function CostTab({ showMessage }: { showMessage: (msg: string, type?: 'success' 
     setLoading(false);
     if (res.ok) {
       showMessage(`${data.imported}件の原価データをインポートしました（${brandType === 'parts' ? 'パーツ原価' : 'MAQs原価'}）`);
-      fetchCounts();
+      fetchData();
     } else {
       showMessage(data.error, 'error');
     }
@@ -447,9 +452,12 @@ function CostTab({ showMessage }: { showMessage: (msg: string, type?: 'success' 
   return (
     <Card className="shadow-sm border-0 shadow-gray-200/50">
       <CardHeader className="border-b bg-white rounded-t-xl">
-        <CardTitle className="text-lg flex items-center gap-2">
-          💰 原価データ管理
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            💰 原価データ管理
+          </CardTitle>
+          <Badge className="bg-blue-100 text-blue-700 text-sm px-3 py-1">{items.length}件</Badge>
+        </div>
       </CardHeader>
       <CardContent className="space-y-5 pt-5">
         {/* Stats */}
@@ -462,6 +470,15 @@ function CostTab({ showMessage }: { showMessage: (msg: string, type?: 'success' 
             <p className="text-xs font-semibold text-purple-600 uppercase tracking-wide">MAQs原価</p>
             <p className="text-3xl font-bold text-purple-900 mt-1">{counts.maqs.toLocaleString()}<span className="text-base font-normal text-purple-500 ml-1">件</span></p>
           </div>
+        </div>
+
+        {/* Search */}
+        <div className="flex gap-2 items-end">
+          <div className="flex-1">
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">検索</Label>
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="商品コードまたは原価で検索..." className="h-10" />
+          </div>
+          <Button variant="outline" onClick={fetchData} className="h-10">🔍 検索</Button>
         </div>
 
         {/* Import/Export */}
@@ -497,6 +514,37 @@ function CostTab({ showMessage }: { showMessage: (msg: string, type?: 'success' 
             💡 サンプルCSVダウンロード
           </Button>
         </ActionBar>
+
+        {/* Table */}
+        <div className="max-h-96 overflow-y-auto rounded-xl border">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50">
+                <TableHead className="font-semibold text-xs">商品コード</TableHead>
+                <TableHead className="font-semibold text-xs text-right">原価</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center text-gray-400 py-8">
+                    データがありません。CSVインポートで追加してください。
+                  </TableCell>
+                </TableRow>
+              ) : items.slice(0, 100).map((item, idx) => (
+                <TableRow key={idx} className="hover:bg-blue-50/30">
+                  <TableCell className="text-sm font-mono">{item.product_code}</TableCell>
+                  <TableCell className="text-sm text-right font-mono">{item.cost.toLocaleString()}円</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        {items.length > 100 && (
+          <p className="text-sm text-gray-500 text-center bg-gray-50 rounded-lg py-2">
+            他 {items.length - 100} 件あります。検索で絞り込んでください。
+          </p>
+        )}
       </CardContent>
     </Card>
   );
@@ -594,15 +642,20 @@ function ImportHistorySection() {
 /* ── Postal Tab ── */
 function PostalTab({ showMessage }: { showMessage: (msg: string, type?: 'success' | 'error') => void }) {
   const [count, setCount] = useState(0);
+  const [items, setItems] = useState<{ postal_code: string; prefecture: string; city: string }[]>([]);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const fetchCount = useCallback(async () => {
-    const res = await fetch('/api/master/postal-codes');
+  const fetchData = useCallback(async () => {
+    const params = new URLSearchParams({ list: 'true' });
+    if (search) params.set('q', search);
+    const res = await fetch(`/api/master/postal-codes?${params}`);
     const data = await res.json();
     setCount(data.count);
-  }, []);
+    setItems(data.items || []);
+  }, [search]);
 
-  useEffect(() => { fetchCount(); }, [fetchCount]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -615,7 +668,7 @@ function PostalTab({ showMessage }: { showMessage: (msg: string, type?: 'success
     setLoading(false);
     if (res.ok) {
       showMessage(`${data.imported.toLocaleString()}件の郵便番号データをインポートしました`);
-      fetchCount();
+      fetchData();
     } else {
       showMessage(data.error, 'error');
     }
@@ -625,15 +678,27 @@ function PostalTab({ showMessage }: { showMessage: (msg: string, type?: 'success
   return (
     <Card className="shadow-sm border-0 shadow-gray-200/50">
       <CardHeader className="border-b bg-white rounded-t-xl">
-        <CardTitle className="text-lg flex items-center gap-2">
-          📮 郵便番号データ
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            📮 郵便番号データ
+          </CardTitle>
+          <Badge className="bg-green-100 text-green-700 text-sm px-3 py-1">{count.toLocaleString()}件</Badge>
+        </div>
       </CardHeader>
       <CardContent className="space-y-5 pt-5">
         {/* Stats */}
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-100">
           <p className="text-xs font-semibold text-green-600 uppercase tracking-wide">登録件数</p>
           <p className="text-3xl font-bold text-green-900 mt-1">{count.toLocaleString()}<span className="text-base font-normal text-green-500 ml-1">件</span></p>
+        </div>
+
+        {/* Search */}
+        <div className="flex gap-2 items-end">
+          <div className="flex-1">
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">検索</Label>
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="郵便番号・都道府県・市区町村で検索..." className="h-10" />
+          </div>
+          <Button variant="outline" onClick={fetchData} className="h-10">🔍 検索</Button>
         </div>
 
         {/* Import/Export */}
@@ -663,6 +728,39 @@ function PostalTab({ showMessage }: { showMessage: (msg: string, type?: 'success
             📎 日本郵便ダウンロードページ
           </a>
         </ActionBar>
+
+        {/* Table */}
+        <div className="max-h-96 overflow-y-auto rounded-xl border">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50">
+                <TableHead className="font-semibold text-xs">郵便番号</TableHead>
+                <TableHead className="font-semibold text-xs">都道府県</TableHead>
+                <TableHead className="font-semibold text-xs">市区町村</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-gray-400 py-8">
+                    データがありません。KEN_ALL.CSVをインポートしてください。
+                  </TableCell>
+                </TableRow>
+              ) : items.slice(0, 100).map((item, idx) => (
+                <TableRow key={idx} className="hover:bg-blue-50/30">
+                  <TableCell className="text-sm font-mono">{item.postal_code}</TableCell>
+                  <TableCell className="text-sm">{item.prefecture}</TableCell>
+                  <TableCell className="text-sm">{item.city}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        {items.length > 100 && (
+          <p className="text-sm text-gray-500 text-center bg-gray-50 rounded-lg py-2">
+            他 {items.length - 100} 件あります。検索で絞り込んでください。
+          </p>
+        )}
       </CardContent>
     </Card>
   );
